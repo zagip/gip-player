@@ -142,7 +142,20 @@
             border-radius: 50%;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: 1.2rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .control-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .control-btn.play-pause svg {
+            width: 28px;
+            height: 28px;
         }
 
         .control-btn:hover {
@@ -151,11 +164,26 @@
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
         }
 
-        .control-btn.play-pause {
-            width: 60px;
-            height: 60px;
-            font-size: 1.5rem;
-            background: rgba(255, 215, 0, 0.15);
+        @media (max-width: 768px) {
+            .player-container {
+                padding: 1.5rem;
+                width: 95%;
+            }
+
+            .control-btn {
+                width: 45px;
+                height: 45px;
+            }
+
+            .control-btn.play-pause {
+                width: 55px;
+                height: 55px;
+            }
+
+            .track-item {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -170,6 +198,9 @@
             <div class="track-item" data-src="music/гипыч читер.mp3">Гипыч-читер</div>
             <div class="track-item" data-src="music/spasti-10-detei.mp3">Спасти 10 детей</div>
             <div class="track-item" data-src="music/gipo tal tal tal tal talypaus .mp3">Gipotal</div>
+            <div class="track-item" data-src="music/логсыч фыхах.mp3">Гасатель</div>
+            <div class="track-item" data-src="music/Белозёр и его видюха (1).mp3">Белозер</div>
+            <div class="track-item" data-src="music/гипогалясыч тильт.mp3">Фортнайтер</div>
         </div>
         
         <div class="player-controls">
@@ -183,9 +214,21 @@
             </div>
             
             <div class="controls">
-                <button class="control-btn prev">⏮</button>
-                <button class="control-btn play-pause">▶</button>
-                <button class="control-btn next">⏭</button>
+                <button class="control-btn prev">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                    </svg>
+                </button>
+                <button class="control-btn play-pause">
+                    <svg viewBox="0 0 24 24" class="play-icon">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+                <button class="control-btn next">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                    </svg>
+                </button>
             </div>
         </div>
     </div>
@@ -214,10 +257,10 @@
         function togglePlay() {
             if (isPlaying) {
                 audio.pause();
-                playPauseBtn.textContent = '▶';
+                playPauseBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
             } else {
                 audio.play();
-                playPauseBtn.textContent = '⏸';
+                playPauseBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
             }
             isPlaying = !isPlaying;
         }
