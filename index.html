@@ -304,6 +304,7 @@
         
         let currentTrackIndex = 0;
         let isPlaying = false;
+        let isDragging = false;
 
         function loadTrack(index) {
             const track = tracks[index];
@@ -341,6 +342,14 @@
             return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
         }
 
+        function updateProgress(e) {
+            if (isDragging) {
+                const rect = progressContainer.getBoundingClientRect();
+                const clickPosition = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                audio.currentTime = clickPosition * audio.duration;
+            }
+        }
+
         // События
         playPauseBtn.addEventListener('click', togglePlay);
         nextBtn.addEventListener('click', playNext);
@@ -365,9 +374,19 @@
             durationEl.textContent = formatTime(audio.duration);
         });
 
-        progressContainer.addEventListener('click', (e) => {
-            const clickPosition = e.offsetX / progressContainer.offsetWidth;
-            audio.currentTime = clickPosition * audio.duration;
+        progressContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            updateProgress(e);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                updateProgress(e);
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
         });
 
         audio.addEventListener('ended', playNext);
