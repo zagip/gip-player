@@ -38,6 +38,7 @@
             display: flex;
             flex-direction: column;
             height: 80vh;
+            transition: box-shadow 0.1s ease;
         }
 
         .track-list {
@@ -306,6 +307,34 @@
         let currentTrackIndex = 0;
         let isPlaying = false;
         let isDragging = false;
+        let isAnalyserStarted = false;
+
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const source = audioContext.createMediaElementSource(audio);
+        
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+        
+        analyser.fftSize = 256;
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+        
+        function updateGlow() {
+            analyser.getByteFrequencyData(dataArray);
+            
+            // Получаем среднее значение громкости
+            const average = dataArray.reduce((acc, val) => acc + val, 0) / bufferLength;
+            
+            // Масштабируем значение для эффекта свечения
+            const glowIntensity = Math.min(100, average * 0.5);
+            const glowColor = `rgba(255, 215, 0, ${Math.min(0.5, average / 255)})`;
+            
+            document.querySelector('.player-container').style.boxShadow = 
+                `0 0 ${30 + glowIntensity}px ${glowColor}`;
+                
+            requestAnimationFrame(updateGlow);
+        }
 
         function loadTrack(index) {
             const track = tracks[index];
@@ -320,7 +349,12 @@
                 playPauseBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
             } else {
                 audio.play();
+                audioContext.resume(); // Возобновляем контекст
                 playPauseBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
+                if (!isAnalyserStarted) {
+                    updateGlow();
+                    isAnalyserStarted = true;
+                }
             }
             isPlaying = !isPlaying;
         }
