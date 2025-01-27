@@ -362,37 +362,36 @@
             const bars = visualizerContainer.children;
             const step = Math.floor(dataArray.length / (bars.length / 2));
             
-            // Обновляем левую половину
+            const time = Date.now() * 0.001;
+            
             for (let i = 0; i < bars.length / 2; i++) {
                 const value = dataArray[i * step];
-                const height = Math.pow(value / 255, 1.8) * 100; // Увеличили степень для более выраженной динамики
+                const height = Math.pow(value / 255, 1.8) * 100;
                 
-                // Параболический эффект для более плавного перехода к центру
                 const position = i / (bars.length / 2);
                 const multiplier = 1 - Math.pow(position - 1, 2);
-                const finalHeight = height * (0.4 + multiplier * 0.6); // Настроили множители
+                const finalHeight = height * (0.4 + multiplier * 0.6);
                 
-                // Создаем градиент цветов от оранжевого к желтому в зависимости от значения
-                const hue = 45 + (value / 255) * 15; // Диапазон от 45 (оранжевый) до 60 (желтый)
-                const saturation = 90 + (value / 255) * 10; // От 90% до 100%
-                const lightness = 40 + (value / 255) * 20; // От 40% до 60%
-                const alpha = (value / 255) * 0.7 + 0.3; // От 0.3 до 1.0
+                // Увеличиваем диапазон колебания цвета (30-70 вместо 45-60)
+                const baseHue = (Math.sin(time) * 20 + 50);
+                const hue = baseHue + (value / 255) * 20;
+                // Увеличиваем насыщенность
+                const saturation = 95 + (value / 255) * 5;
+                const lightness = 45 + (value / 255) * 25;
+                const alpha = (value / 255) * 0.8 + 0.2; // Увеличиваем прозрачность
                 
                 const color = `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
                 
-                // Обновляем левую полоску
                 bars[i].style.height = `${finalHeight}%`;
                 bars[i].style.background = color;
-                bars[i].style.boxShadow = `0 0 10px ${color}`;
+                bars[i].style.boxShadow = `0 0 15px ${color}`; // Увеличиваем размер свечения
                 
-                // Обновляем симметричную правую полоску
                 const rightIndex = bars.length - 1 - i;
                 bars[rightIndex].style.height = `${finalHeight}%`;
                 bars[rightIndex].style.background = color;
-                bars[rightIndex].style.boxShadow = `0 0 10px ${color}`;
+                bars[rightIndex].style.boxShadow = `0 0 15px ${color}`;
             }
             
-            // Обновляем свечение плеера
             const bassRange = dataArray.slice(0, bufferLength / 3);
             const midRange = dataArray.slice(bufferLength / 3, 2 * bufferLength / 3);
             const trebleRange = dataArray.slice(2 * bufferLength / 3);
@@ -401,14 +400,16 @@
             const midAvg = midRange.reduce((acc, val) => acc + val, 0) / midRange.length;
             const trebleAvg = trebleRange.reduce((acc, val) => acc + val, 0) / trebleRange.length;
             
-            const bassGlow = `rgba(255, ${Math.min(165 + bassAvg/2, 255)}, 0, ${Math.min(0.6, bassAvg/255)})`;
-            const midGlow = `rgba(255, ${Math.min(215 + midAvg/2, 255)}, 0, ${Math.min(0.6, midAvg/255)})`;
-            const trebleGlow = `rgba(255, ${Math.min(235 + trebleAvg/2, 255)}, ${Math.min(trebleAvg, 100)}, ${Math.min(0.6, trebleAvg/255)})`;
+            // Увеличиваем диапазон колебания для свечения плеера
+            const baseHue = (Math.sin(time) * 20 + 50);
+            const bassGlow = `hsla(${baseHue - 10}, 100%, ${Math.min(55 + bassAvg/4, 75)}%, ${Math.min(0.7, bassAvg/255)})`;
+            const midGlow = `hsla(${baseHue}, 100%, ${Math.min(60 + midAvg/4, 80)}%, ${Math.min(0.7, midAvg/255)})`;
+            const trebleGlow = `hsla(${baseHue + 10}, 100%, ${Math.min(65 + trebleAvg/4, 85)}%, ${Math.min(0.7, trebleAvg/255)})`;
             
             document.querySelector('.player-container').style.boxShadow = 
-                `0 ${20 + bassAvg * 0.3}px ${30 + bassAvg * 0.5}px ${bassGlow},
-                 ${-(20 + midAvg * 0.3)}px 0 ${30 + midAvg * 0.5}px ${midGlow},
-                 ${20 + trebleAvg * 0.3}px 0 ${30 + trebleAvg * 0.5}px ${trebleGlow}`;
+                `0 ${25 + bassAvg * 0.4}px ${35 + bassAvg * 0.6}px ${bassGlow},
+                 ${-(25 + midAvg * 0.4)}px 0 ${35 + midAvg * 0.6}px ${midGlow},
+                 ${25 + trebleAvg * 0.4}px 0 ${35 + trebleAvg * 0.6}px ${trebleGlow}`;
                 
             requestAnimationFrame(updateGlow);
         }
